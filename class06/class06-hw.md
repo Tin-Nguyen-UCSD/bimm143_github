@@ -96,7 +96,7 @@ plot_protein_bfactor("4AKE")
       Note: Accessing on-line PDB file
 
     Warning in get.pdb(file, path = tempdir(), verbose = FALSE):
-    /var/folders/ct/6y8d1snj4zn_53hz1gdp6wfc0000gn/T//RtmpKhh8sG/4AKE.pdb exists.
+    /var/folders/ct/6y8d1snj4zn_53hz1gdp6wfc0000gn/T//RtmpDuNlVK/4AKE.pdb exists.
     Skipping download
 
 ![](class06-hw_files/figure-commonmark/unnamed-chunk-3-1.png)
@@ -109,7 +109,7 @@ plot_protein_bfactor("1AKE")
       Note: Accessing on-line PDB file
 
     Warning in get.pdb(file, path = tempdir(), verbose = FALSE):
-    /var/folders/ct/6y8d1snj4zn_53hz1gdp6wfc0000gn/T//RtmpKhh8sG/1AKE.pdb exists.
+    /var/folders/ct/6y8d1snj4zn_53hz1gdp6wfc0000gn/T//RtmpDuNlVK/1AKE.pdb exists.
     Skipping download
 
        PDB has ALT records, taking A only, rm.alt=TRUE
@@ -124,7 +124,7 @@ plot_protein_bfactor("1E4Y")
       Note: Accessing on-line PDB file
 
     Warning in get.pdb(file, path = tempdir(), verbose = FALSE):
-    /var/folders/ct/6y8d1snj4zn_53hz1gdp6wfc0000gn/T//RtmpKhh8sG/1E4Y.pdb exists.
+    /var/folders/ct/6y8d1snj4zn_53hz1gdp6wfc0000gn/T//RtmpDuNlVK/1E4Y.pdb exists.
     Skipping download
 
 ![](class06-hw_files/figure-commonmark/unnamed-chunk-3-3.png)
