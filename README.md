@@ -15,7 +15,7 @@ My classwork from [BIMM 143 Spring 25](https://tin-nguyen-ucsd.github.io/bimm143
 
 - 10 [Structural Bioinformatics(pt1)](https://github.com/Tin-Nguyen-UCSD/bimm143_github/blob/main/class10/class10.md)
 
-- 11 [Structural Bioinformatics(pt2 AlphaFold](https://github.com/Tin-Nguyen-UCSD/bimm143_github/blob/main/class11/Untitled.qmd)
+- 11 [Structural Bioinformatics(pt2 AlphaFold)](https://github.com/Tin-Nguyen-UCSD/bimm143_github/blob/main/class11/Untitled.qmd)
 
 - 12 [Genome informatics and high throughput sequencing](https://github.com/Tin-Nguyen-UCSD/bimm143_github/blob/main/class12/class12.md)
 
