@@ -1,0 +1,208 @@
+---
+title: "class05"
+author: "Tin Nguyen (PID:A15334147)"
+format: pdf
+toc: true
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+```{r}
+#install.packages("ggplot2")
+```
+
+```{r}
+library(ggplot2)
+ggplot(cars)
+```
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point()
+```
+
+> Q. add a line to show the relationship of speed to stopping distance (i.e. add another "layer")
+
+```{r}
+p <- ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() +
+  geom_smooth(se=FALSE, method="lm")
+```
+
+> Q. Add a title and subtitle for the plot 
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point()
+```
+
+> Q. add a line to show the relationship of speed to stopping distance (i.e. add another "layer")
+
+I can always save anyggplot object (i.e. plot) and then use it later for adding more layers. 
+
+```{r}
+p + ggtitle("testing")
+
+p + labs(title = "My first gg plot", subtitle = "stopping ditance of old cars", caption = "BIMM143", x = "Speed (MPG)", y = "stopping ditsance (ft)") +
+  theme_bw()
+```
+
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+```
+
+
+> Q. How many columns are there?
+
+```{r}
+
+ncol(genes)
+```
+
+> Q. what re the coluumn names?
+
+```{r}
+
+colnames(genes)
+```
+
+> Q. How many "up" and "down" regulated genees are there?
+
+```{r}
+
+#genes$State
+
+head(table(genes$State))
+```
+## Custom color plot
+> Q. Make a first plot of this data 
+
+```{r}
+
+ggplot(genes) + 
+  aes(x=Condition1, y=Condition2, col=State) +
+  scale_color_manual( values = c("green", "gray","red")) +
+  geom_point() +
+  labs(title="Gene expression changes upon drug treatment", x = "Control (no drug)", y = "Drug treated")
+  #theme_bw()
+
+```
+
+# Using different geoms
+
+Let's plot some aspects of the in-built 'mtcars' dataset.
+
+```{r}
+
+head(mtcars)
+
+```
+
+> Q. Scatter plot of 'mpg' vs 'disp'
+
+```{r}
+
+p1 <- ggplot(mtcars) +
+  aes(x=mpg, y=disp)+
+  geom_point()
+
+
+```
+
+> Q. boxplot of 'gear' vs 'disp'
+
+```{r}
+
+p2 <- ggplot(mtcars) +
+  aes(x=gear, y=disp, group=gear)+
+  geom_boxplot()
+
+```
+
+> Q. barplot of 'carb'
+
+```{r}
+
+p3 <- ggplot(mtcars) +
+  aes(x=carb)+
+  geom_bar()
+
+```
+
+> Smooth of 'disp' vs 'qsec'
+
+```{r}
+
+p4 <- ggplot(mtcars) +
+  aes(x=disp, y=qsec)+
+  geom_smooth()
+
+```
+
+I want to combine all these plots into one figure with multiple pannels
+
+We can use **patchwork** package to do this. 
+
+```{r}
+library(patchwork)
+
+(p1 / p2 | p3 / p4)
+
+```
+
+```{r}
+
+ggsave(filename = "myplot.png", width=10, height = 10)
+
+```
+
+
+```{r}
+
+# File location online
+url <- "https://raw.githubusercontent.com/jennybc/gapminder/master/inst/extdata/gapminder.tsv"
+
+gapminder <- read.delim(url)
+
+
+```
+
+> Q. How many countryies are in this dataset?
+
+```{r}
+
+#gapminder$country
+
+#table(gapminder$country)
+
+```
+```{r}
+
+length(table(gapminder$country))
+
+```
+
+> Q plot gdpPercap vs lifeExp color by continent
+
+```{r}
+
+ggplot(gapminder) + 
+  aes(x=gdpPercap, y=lifeExp, col=continent) +
+  geom_point(alpha = 0.3) +
+  facet_wrap(~continent) +
+  labs(title="GDP per Cap Vs life Expectancy", x = "gdpPercap", y = "lifeExp")
+  #theme_bw()
+
+
+```
