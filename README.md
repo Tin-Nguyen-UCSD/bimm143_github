@@ -1,5 +1,5 @@
 # BIMM143
-My classwork from BIMM 143 Spring 25 at UC San Diego.
+My classwork from [BIMM 143 Spring 25](link) at UC San Diego.
 test
 
 - 04 Into to R
