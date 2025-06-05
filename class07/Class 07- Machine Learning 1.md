@@ -54,16 +54,16 @@ km
 
     Cluster means:
               x         y
-    1  3.303260 -2.912757
-    2 -2.912757  3.303260
+    1 -2.654899  2.466220
+    2  2.466220 -2.654899
 
     Clustering vector:
-     [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1
-    [39] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+     [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+    [39] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
 
     Within cluster sum of squares by cluster:
-    [1] 38.59219 38.59219
-     (between_SS / total_SS =  93.8 %)
+    [1] 63.21958 63.21958
+     (between_SS / total_SS =  86.2 %)
 
     Available components:
 
@@ -98,8 +98,8 @@ km$size
 km$cluster
 ```
 
-     [1] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 1 1 1 1 1 1 1 1
-    [39] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
+     [1] 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2 2 2 2 2 2
+    [39] 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2
 
 > Q. Cluster centers?
 
@@ -108,8 +108,8 @@ km$centers
 ```
 
               x         y
-    1  3.303260 -2.912757
-    2 -2.912757  3.303260
+    1 -2.654899  2.466220
+    2  2.466220 -2.654899
 
 > Q. Make a plot of our ‘kmeans()’ results showing cluster assignment
 > using different colors for each cluster/group of points and cluster
@@ -183,7 +183,7 @@ table(grps)
 
     grps
      1  2 
-    30 30 
+    31 29 
 
 ``` r
 plot(x, col = grps)

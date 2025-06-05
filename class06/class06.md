@@ -33,7 +33,7 @@ generate_dna <- function(length){
 generate_dna(10)
 ```
 
-     [1] "T" "T" "C" "A" "G" "A" "A" "C" "A" "T"
+     [1] "T" "C" "A" "A" "G" "G" "T" "G" "T" "A"
 
 > Q. Write a third function, generate_protein() to return protein
 > sequences of different lengths and test whether these sequences are
@@ -59,18 +59,18 @@ generate_protein(20)
 ```
 
     > id.1
-    QNHKQQIHFMCLSKEFWTGH 
+    FPYIEGFMCISGIWMWPWFC 
 
-    [1] "> id.1\nQNHKQQIHFMCLSKEFWTGH"
+    [1] "> id.1\nFPYIEGFMCISGIWMWPWFC"
 
 ``` r
 generate_protein(20, "id.2")
 ```
 
     > id.2
-    LSRGAENKEAFKVCWWKFFK 
+    RFTPQHSQACLIQAGTCERQ 
 
-    [1] "> id.2\nLSRGAENKEAFKVCWWKFFK"
+    [1] "> id.2\nRFTPQHSQACLIQAGTCERQ"
 
 ``` r
 #
@@ -83,23 +83,23 @@ sapply(seq_along(protein_lengths), function(i) {
 ```
 
     > id.1
-    DSMPQH 
+    WSYNFT 
     > id.2
-    PHMERFT 
+    IHGIPLF 
     > id.3
-    MCYDRYTE 
+    YTYSQDQK 
     > id.4
-    LCDDCTVLV 
+    TVTKRILNH 
     > id.5
-    SRGHGFVPVD 
+    WAWEMFAIMF 
     > id.6
-    LMERQKKMTCM 
+    IYRPQQPPHWS 
     > id.7
-    VDILIEMWYGGW 
+    TNYDEMFPMYQP 
 
-    [1] "> id.1\nDSMPQH"       "> id.2\nPHMERFT"      "> id.3\nMCYDRYTE"    
-    [4] "> id.4\nLCDDCTVLV"    "> id.5\nSRGHGFVPVD"   "> id.6\nLMERQKKMTCM" 
-    [7] "> id.7\nVDILIEMWYGGW"
+    [1] "> id.1\nWSYNFT"       "> id.2\nIHGIPLF"      "> id.3\nYTYSQDQK"    
+    [4] "> id.4\nTVTKRILNH"    "> id.5\nWAWEMFAIMF"   "> id.6\nIYRPQQPPHWS" 
+    [7] "> id.7\nTNYDEMFPMYQP"
 
 > Q. Determine if these sequences can be found in nature or or are they
 > unique? Why or why not?
