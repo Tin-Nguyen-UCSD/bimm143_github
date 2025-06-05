@@ -1,6 +1,5 @@
 # BIMM143
 My classwork from [BIMM 143 Spring 25](https://tin-nguyen-ucsd.github.io/bimm143_github/) at UC San Diego.
-test
 
 - 04 [Into to R](https://github.com/Tin-Nguyen-UCSD/bimm143_github/blob/main/class04/class04.md)
 
