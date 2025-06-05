@@ -1,0 +1,170 @@
+---
+title: "class10"
+author: "Tin Nguyen"
+format: pdf
+---
+
+```{r}
+read.csv("Data Export Summary.csv")
+
+pdb.data <- read.csv("Data Export Summary.csv")
+```
+
+>Q1. What percentage of structures in the PDB are solved by X-Ray and electron Microscopy
+
+
+```{r}
+
+xray <- as.numeric(gsub(",", "", pdb.data$X.ray))
+em <- as.numeric(gsub(",", "", pdb.data$EM))
+total <- as.numeric(gsub(",", "", pdb.data$Total))
+
+total_sum <- sum(total)
+xray_percent <- 100 * sum(xray) / total_sum
+em_percent <- 100 * sum(em) / total_sum
+
+xray_percent
+em_percent
+
+```
+
+
+>Q2. What proportion of structures in the PDB are protein
+
+
+```{r}
+
+
+protein_index <- which(pdb.data$Molecular.Type == "Protein (only)")
+
+protein_total <- total[protein_index]
+
+protein_percent <- 100 * protein_total / total_sum
+protein_percent
+
+```
+
+
+
+>Q3. Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB
+
+around 1090 stuctures
+
+## Introduction to Bio3D in R
+
+```{r}
+library(bio3d)
+```
+
+```{r}
+pdb <- read.pdb("1hsg")
+```
+
+```{r}
+pdb
+```
+```{r}
+attributes(pdb)
+```
+
+```{r}
+head(pdb$atom)
+```
+
+
+
+```{r}
+adk <- read.pdb("6s36")
+```
+
+```{r}
+adk
+```
+
+```{r}
+# Perform flexiblity prediction
+m <- nma(adk)
+```
+
+```{r}
+plot(m)
+```
+
+
+```{r}
+mktrj(m, file="adk_m7.pdb")
+```
+
+
+
+```{r}
+library(bio3d)
+aa <- get.seq("1ake_A")
+```
+
+```{r}
+hits <- NULL
+hits$pdb.id <- c('1AKE_A','6S36_A','6RZE_A','3HPR_A','1E4V_A','5EJE_A','1E4Y_A','3X2S_A','6HAP_A','6HAM_A','4K46_A','3GMT_A','4PZL_A')
+```
+
+```{r}
+# Download releated PDB files
+files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
+```
+
+```{r}
+# Align releated PDBs
+pdbs <- pdbaln(files, fit = TRUE, exefile="msa")
+```
+
+```{r}
+# Vector containing PDB codes for figure axis
+ids <- basename.pdb(pdbs$id)
+
+# Draw schematic alignment
+#plot(pdbs, labels=ids)
+```
+
+```{r}
+anno <- pdb.annotate(ids)
+unique(anno$source)
+```
+
+```{r}
+# Perform PCA
+pc.xray <- pca(pdbs)
+plot(pc.xray)
+```
+
+```{r}
+# Calculate RMSD
+rd <- rmsd(pdbs)
+
+# Structure-based clustering
+hc.rd <- hclust(dist(rd))
+grps.rd <- cutree(hc.rd, k=3)
+
+plot(pc.xray, 1:2, col="grey50", bg=grps.rd, pch=21, cex=1)
+```
+
+```{r}
+#Plotting results with ggplot2
+library(ggplot2)
+library(ggrepel)
+
+df <- data.frame(PC1=pc.xray$z[,1], 
+                 PC2=pc.xray$z[,2], 
+                 col=as.factor(grps.rd),
+                 ids=ids)
+
+p <- ggplot(df) + 
+  aes(PC1, PC2, col=col, label=ids) +
+  geom_point(size=2) +
+  geom_text_repel(max.overlaps = 20) +
+  theme(legend.position = "none")
+p
+```
+
+
+
+

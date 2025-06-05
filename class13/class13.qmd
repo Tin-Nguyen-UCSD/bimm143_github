@@ -1,0 +1,492 @@
+---
+title: "class13"
+author: "Tin Nguyen"
+format: pdf
+toc: true
+---
+
+
+```{r}
+counts <- read.csv("airway_scaledcounts.csv", row.names = 1)
+metadata <- read.csv("airway_metadata.csv")
+
+# View the first few rows of each
+head(counts)
+head(metadata)
+```
+
+
+```{r}
+#nrow()
+```
+
+> Q2. How many 'control' cell lines do we have?
+
+```{r}
+
+metadata
+table(metadata$dex)
+
+```
+
+```{r}
+sum(metadata$dex =="control")
+```
+
+
+# TOY DIFFERENTIAL GENE EXPRESSION
+
+Let's try finding the average or mean of the "control" and "treated" columns and see if they differ.
+
+
+1. Frst we nêd to find all "control" columns
+2. Extract just the "control" values for each gene
+3. Calculate the 'mean()' for each gene "control" values
+
+```{r}
+
+metadata == "control"
+
+metadata
+
+```
+```{r}
+
+all(colnames(counts) == metadata$id)
+
+```
+
+The $dex column tells me whether we have "control" or "treated"
+
+```{r}
+
+control.inds <- (metadata$dex == "control")
+treated.inds <- (metadata$dex == "treated")
+
+```
+
+Extract just the "control" values for all genes
+
+```{r}
+
+control.counts <- counts[,control.inds]
+
+treated.counts <- counts[,treated.inds]
+```
+
+Calculate the mean value for each genee in these "control" columns
+
+```{r}
+
+control.mean <- rowMeans(control.counts)
+
+
+```
+
+
+> Q3. Do the same for "treated" to get a "treated.mean"
+
+```{r}
+
+treated.mean <- rowMeans(treated.counts)
+
+```
+
+> Q4. Make a plot of `control.mean' vs `treated.mean'
+
+Let's store our mean values together in a data.grame for easier book-keeping
+
+```{r}
+
+meancounts <- data.frame(control.mean, treated.mean)
+
+head(meancounts)
+
+```
+
+
+```{r}
+
+plot(meancounts)
+
+
+```
+
+
+```{r}
+
+library(ggplot2)
+
+ggplot(meancounts) +
+  aes(control.mean, treated.mean) +
+  geom_point(alpha=0.3)
+
+```
+
+We totally need to log transform this data as it is so heavily sckewed!
+
+```{r}
+
+plot(meancounts, log="xy")
+
+```
+
+
+```{r}
+
+library(ggplot2)
+
+ggplot(meancounts) +
+  aes(control.mean, treated.mean) +
+  geom_point(alpha=0.3) +
+  scale_x_continuous(trans = 'log2') +
+  scale_y_continuous(trans = 'log2')
+
+```
+
+Doubling of the amount
+
+```{r}
+
+#TREATED/CONTROL
+
+log2(20/20)
+
+log2(40/20)
+
+
+```
+
+Half the amount
+
+```{r}
+
+log2(10/20)
+
+```
+
+A common "rule-of-thumb" is to focus on genes with a log2 "fold-change" of +2 as so-called UP REGULATED and -2 as DOWN REGULATED
+
+```{r}
+
+log2(80/20)
+
+```
+
+
+Let's add a log2 fold-change value to our meancounts data.grame
+
+```{r}
+
+meancounts$log2fc <- log2(meancounts$treated.mean/meancounts$control.mean)
+
+head(meancounts)
+
+```
+
+> Q. Remove any "zero count" genes from our dataset for further analysis
+
+```{r}
+
+to.keep <- rowSums( meancounts[,1:2] == 0) == 0
+sum(to.keep)
+
+```
+
+```{r}
+
+mycounts <- meancounts[to.keep,]
+head(mycounts)
+
+```
+
+
+> Q. How many genes are "up" regulated at a log2fc threshold of +2 
+
+```{r}
+
+sum(mycounts$log2fc >= 2)
+
+```
+
+
+> Q. How many genes are "down" regulated at a log2fc threshold of -2
+
+```{r}
+
+sum(mycounts$log2fc <= 2)
+
+```
+
+# Hold on we are missing stats
+
+
+
+# DESeq2 analysis
+
+Let's do this properly and consider the stats - are the differences in the means significants ?
+
+We wil use DESeq2 to do this:
+
+```{r, message = FALSE}
+
+library(DESeq2)
+
+```
+
+
+The first function we will use from this package setes up the input in the particular format that DESeq 
+
+```{r}
+
+dds <- DESeqDataSetFromMatrix(countData=counts, 
+                              colData=metadata, 
+                              design=~dex)
+dds
+
+```
+
+
+We can now run our DESq analysis
+
+```{r}
+
+dds <- DESeq(dds)
+
+res <- results(dds)
+
+```
+
+Peak at results
+
+```{r}
+head(res)
+```
+
+# Result figure : Volcano Plots
+
+Plot of the log2FC vs P-avlue
+
+```{r}
+
+plot(res$log2FoldChange,res$padj)
+```
+This P-value data is again heavily skewed so lets log transform it
+```{r}
+
+plot( res$log2FoldChange, log(res$padj))
+
+```
+
+
+```{r}
+
+log(0.3)
+
+```
+We can flip the y-axis by adding a minus sign. This will make it easier to interpret
+
+```{r}
+
+plot( res$log2FoldChange, -log(res$padj))
+abline( v = -2, col = "red" )
+abline( v = +2, col = "red" )
+abline( h = -log(0.05), col = "red" )
+
+```
+
+Let's add some color.
+
+```{r}
+
+mycols <- rep("gray", nrow(res))
+mycols[ res$log2FoldChange <= -2 ] <- "blue"
+mycols[ res$log2FoldChange >= +2 ] <- "red"
+mycols[res$padj >= 0.005] <- "gray"
+
+
+
+
+plot(res$log2FoldChange, -log(res$padj), col = mycols)
+
+abline( v = -2, col = "red" )
+abline( v = +2, col = "red" )
+abline( h = -log(0.05), col = "red" )
+
+```
+
+
+
+
+```{r}
+head(res)
+```
+
+> Q. Make a ggplot volcano pllot iwth colors and lines as annotation along with nice axis labels
+
+
+```{r}
+ggplot(as.data.frame(res))+
+    aes(log2FoldChange, -log(padj)) +
+    geom_point( color = mycols)  +
+    geom_vline(xintercept = -2, color = "red") +
+    geom_vline(xintercept = 2, color = "red") +
+    geom_hline(yintercept = -log(0.05), color = "red") +
+    labs(title = "Title", x= "xaxis" ,y ="yaxis") +
+    theme_bw() +
+    labs( x = "Log2 Fold-Change", y = "-log(Adjusted P-value)")
+```
+
+## We need to add geen annotation
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+```
+
+```{r}
+columns(org.Hs.eg.db)
+```
+
+
+```{r}
+res$symbol <- mapIds(org.Hs.eg.db,
+                     keys=rownames(res), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="SYMBOL",          # The new format we want to add
+                     multiVals="first")
+```
+
+
+```{r}
+head(res)
+```
+
+
+
+
+Add a few more ID mappings including "GENENAME" and "ENTREZID".
+```{r}
+
+res$name <- mapIds( x = org.Hs.eg.db,
+                    keys = rownames(res),
+                    keytype = "ENSEMBL",
+                    column = "GENENAME")
+
+res$entrez <- mapIds( x = org.Hs.eg.db,
+                    keys = rownames(res),
+                    keytype = "ENSEMBL",
+                    column = "ENTREZID")
+
+head(res)
+
+```
+
+
+Be sure to save our anontated results to a file.
+
+
+```{r}
+
+write.csv(res, file = "my_annotated_results.csv")
+
+```
+
+
+
+## Pathway Analysis
+
+Install the packages we need for pathway analysis: Run in your R console (i.e. not your Rmarkdown doc!)
+BiocManager::install( c("pathview", "gage", "gageData") )
+
+
+```{r}
+
+library(gage)
+library(gageData)
+library(pathview)
+
+
+```
+
+```{r}
+data(kegg.sets.hs)
+
+# Examine the first 2 pathways in this kegg set for humans
+head(kegg.sets.hs, 2)
+```
+
+To run pathway analysis we will use the 'gage()' function and it requires a wee "vector of importance". We will use our Log2FC results from our 'res' object.
+
+```{r}
+
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+
+```{r}
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+What is in the returned 'keggres' object
+
+```{r}
+
+attributes(keggres)
+
+```
+
+```{r}
+head(keggres$less)
+```
+
+We can pass our fold changes vector (our results) together with any of these highlighted pathway IDs to see how our genes overlap the pathway.
+
+```{r}
+
+pathview(gene.data=foldchanges, pathway.id="hsa05310")
+
+```
+
+![The Asthma Pathway overlaps with our differentially expressed genes](hsa05310.pathview.png)
+
+
+```{r}
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

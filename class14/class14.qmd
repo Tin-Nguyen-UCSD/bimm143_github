@@ -1,0 +1,318 @@
+---
+title: "class14"
+author: "Tin Nguyen"
+format: pdf
+---
+
+```{r, message = FALSE}
+
+library(DESeq2)
+library(AnnotationDbi)
+library(org.Hs.eg.db)
+library(pathview)
+library(gage)
+library(gageData)
+
+
+```
+
+# Data import
+
+```{r}
+
+colData <- read.csv("GSE37704_metadata.csv",row.names = 1)
+countData <- read.csv("GSE37704_featurecounts.csv",row.names = 1)
+
+```
+
+```{r}
+
+head(countData)
+
+```
+
+check the correspondance of colData rows and countData columns
+
+```{r}
+rownames(colData)
+```
+
+Remove the troublesome first column so we can match the matadata
+
+```{r}
+counts <- countData[,-1]
+```
+
+```{r}
+all(rownames(colData) == colnames(counts))
+```
+
+We will ahve rows in 'counts' for genes that we can not say anything about because they have zero expression in the particular tissue we are looking at.
+
+```{r}
+head(counts)
+```
+
+# Remove zero count genes
+
+If the `rowSums()` is zero then a give gene (i.e. row) has no count data and we should exclode these genes from further consideration. 
+
+```{r}
+
+#rowSums(counts) == 0
+
+```
+
+
+
+```{r}
+to.keep <- rowSums(counts) != 0
+cleancounts <- counts[to.keep, ]
+
+```
+
+> Q. How many genes do we have left ?
+
+```{r}
+nrow(cleancounts)
+
+```
+# SEtup DESeq object for analysis
+
+```{r}
+
+dds <- DESeqDataSetFromMatrix(countData = cleancounts,
+                              colData = colData,
+                              design = ~condition)
+
+```
+
+
+
+
+#Run DESeq analysis
+
+```{r}
+dds <- DESeq(dds)
+```
+
+#Extract the results
+
+
+```{r}
+res <- results(dds)
+
+head(res)
+```
+
+
+
+
+```{r}
+
+mycols <- rep("gray", nrow(res))
+mycols[ res$log2FoldChange <= -2 ] <- "blue"
+mycols[ res$log2FoldChange >= +2 ] <- "red"
+mycols[res$padj >= 0.005] <- "gray"
+
+
+
+
+plot(res$log2FoldChange, -log(res$padj), col = mycols)
+
+abline( v = -2, col = "red" )
+abline( v = +2, col = "red" )
+abline( h = -log(0.05), col = "red" )
+
+```
+#Add Gene annotation
+
+```{r}
+library("AnnotationDbi")
+library("org.Hs.eg.db")
+
+columns(org.Hs.eg.db)
+```
+
+```{r}
+#row.names(res)
+```
+
+
+
+```{r}
+res$symbol <- mapIds(org.Hs.eg.db,
+                     keys=row.names(res), # Our genenames
+                     keytype="ENSEMBL",        # The format of our genenames
+                     column="SYMBOL",          # The new format we want to add
+                     multiVals="first")
+```
+
+
+```{r}
+head(res)
+```
+
+
+
+
+
+#Save my results to a CSV file
+
+```{r}
+write.csv(res, file = "results.csv")
+```
+
+
+
+#Result visualization
+
+
+
+```{r}
+library(ggplot2)
+
+ggplot(as.data.frame(res))+
+    aes(log2FoldChange, -log(padj), label=res$symbol) +
+    geom_point( color = mycols)  +
+    geom_vline(xintercept = -2, color = "red") +
+    geom_vline(xintercept = 2, color = "red") +
+    geom_hline(yintercept = -log(0.05), color = "red") +
+    labs(title = "Title", x= "xaxis" ,y ="yaxis") +
+    theme_bw() +
+    labs( x = "Log2 Fold-Change", y = "-log(Adjusted P-value)")
+
+
+```
+
+
+```{r}
+
+res$name <- mapIds( x = org.Hs.eg.db,
+                    keys = rownames(res),
+                    keytype = "ENSEMBL",
+                    column = "GENENAME")
+
+res$entrez <- mapIds( x = org.Hs.eg.db,
+                    keys = rownames(res),
+                    keytype = "ENSEMBL",
+                    column = "ENTREZID")
+
+head(res)
+
+```
+```{r}
+
+library(gage)
+library(gageData)
+library(pathview)
+
+
+```
+
+```{r}
+data(kegg.sets.hs)
+
+# Examine the first 2 pathways in this kegg set for humans
+head(kegg.sets.hs, 2)
+```
+
+```{r}
+
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+```{r}
+library(pathview)
+```
+
+```{r}
+library(gage)
+library(gageData)
+
+data(kegg.sets.hs)
+data(sigmet.idx.hs)
+
+# Focus on signaling and metabolic pathways only
+kegg.sets.hs = kegg.sets.hs[sigmet.idx.hs]
+
+# Examine the first 3 pathways
+head(kegg.sets.hs, 3)
+```
+```{r}
+foldchanges = res$log2FoldChange
+names(foldchanges) = res$entrez
+head(foldchanges)
+```
+```{r}
+# Get the results
+keggres = gage(foldchanges, gsets=kegg.sets.hs)
+```
+
+
+```{r}
+
+attributes(keggres)
+
+```
+
+```{r}
+head(keggres$less)
+```
+
+```{r}
+
+pathview(gene.data=foldchanges, pathway.id="hsa04110")
+
+```
+
+![hsa04110](hsa04110.pathview.png)
+```{r}
+# A different PDF based output of the same data
+pathview(gene.data=foldchanges, pathway.id="hsa04110", kegg.native=FALSE)
+```
+
+
+## Reactome analysis online
+
+we need to make a little file of our significant genes that we can upload to the reactome webpage:
+
+```{r}
+## Focus on top 5 upregulated pathways here for demo purposes only
+keggrespathways <- rownames(keggres$greater)[1:5]
+
+# Extract the 8 character long IDs part of each string
+keggresids = substr(keggrespathways, start=1, stop=8)
+keggresids
+```
+```{r}
+pathview(gene.data=foldchanges, pathway.id=keggresids, species="hsa")
+```
+
+
+```{r}
+
+sig_genes <- res[res$padj <= 0.05 & !is.na(res$padj), "symbol"]
+print(paste("Total number of significant genes:", length(sig_genes)))
+
+
+```
+
+```{r}
+sig_genes[6]
+```
+
+
+```{r}
+write.table(sig_genes, file="significant_genes.txt", row.names=FALSE, col.names=FALSE, quote=FALSE)
+```
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,123 @@
+---
+title: "class11"
+author: "Tin"
+format: pdf
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+library(bio3d)
+```
+
+We will analyze the ADK starting with a single ADk database accession code: "1ake_A"
+
+```{r}
+id <- "1ake_A"
+aa <-get.seq(id)
+aa
+
+```
+
+Now we can search the PDB database to find all related enteries. 
+
+```{r}
+blast <- blast.pdb(aa)
+
+```
+```{r}
+attributes(blast)
+
+
+```
+
+```{r}
+head(blast$hit.tbl)
+
+
+```
+
+Make a little summary figure of these results:
+
+```{r}
+
+hits <- plot(blast)
+
+```
+Our "top hits" i.e. the most similar entries in the database are:
+
+```{r}
+
+hits$pdb.id
+
+```
+
+# Download related PDB files
+
+
+```{r}
+
+#Download released PDB files 
+files <- get.pdb(hits$pdb.id, path="pdbs", split=TRUE, gzip=TRUE)
+
+```
+
+Align and supperpose all these sturctures
+
+```{r}
+
+
+
+pdbs <- pdbaln(files, fit=TRUE, exefile="msa")
+
+```
+
+side-note:
+
+```{r}
+
+library(bio3dview)
+
+view.pdbs(pdbs)
+
+```
+
+This is better but still difficult to see what is similar and different in all these structures or indeeed learn much about how this family works.
+
+let's try PCA:
+
+```{r}
+
+pc <- pca(pdbs)
+plot(pc)
+
+```
+
+```{r}
+
+plot(pc, pc.axes = 1:2)
+
+```
+
+```{r}
+
+view.pca(pc)
+
+```
+
+Write a PDB "trajectory" for mol-star
+
+```{r}
+
+mktrj(pc, file = "pca_results.pdb")
+
+```
+
+
+

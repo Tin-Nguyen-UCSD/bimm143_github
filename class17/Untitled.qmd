@@ -1,0 +1,84 @@
+---
+title: "class17"
+author: "Tin"
+format: pdf
+---
+
+
+```{r}
+
+# Load required library
+# install.packages("BiocManager")
+# BiocManager::install("tximport")
+library(tximport)
+
+# Automatically find all *_quant folders in the current directory
+folders <- list.dirs(path = ".", full.names = FALSE, recursive = FALSE)
+folders <- folders[grepl("^SRR21568.*_quant$", folders)]
+
+# Extract sample names (e.g., "SRR2156848" from "SRR2156848_quant")
+samples <- sub("_quant$", "", folders)
+
+# Create full paths to abundance.h5 files
+files <- file.path(folders, "abundance.h5")
+names(files) <- samples
+
+# Import transcript-level counts
+txi.kallisto <- tximport(files, type = "kallisto", txOut = TRUE)
+
+# Optional: quick preview
+head(txi.kallisto$counts)
+
+```
+
+```{r}
+head(txi.kallisto$counts)
+```
+
+```{r, error=TRUE}
+colSums(txi.kallisto$counts)
+```
+
+```{r}
+to.keep <- rowSums(txi.kallisto$counts) > 0
+kset.nonzero <- txi.kallisto$counts[to.keep,]
+```
+
+```{r}
+keep2 <- apply(kset.nonzero,1,sd)>0
+x <- kset.nonzero[keep2,]
+```
+
+```{r}
+pca <- prcomp(t(x), scale=TRUE)
+```
+
+```{r}
+summary(pca)
+```
+
+```{r}
+plot(pca$x[,1], pca$x[,2],
+     col=c("blue","blue","red","red"),
+     xlab="PC1", ylab="PC2", pch=16)
+```
+
+```{r}
+library(ggplot2)
+library(ggrepel)
+
+# Make metadata object for the samples
+colData <- data.frame(condition = factor(rep(c("control", "treatment"), each = 2)))
+rownames(colData) <- colnames(txi.kallisto$counts)
+
+# Make the data.frame for ggplot 
+y <- as.data.frame(pca$x)
+y$Condition <- as.factor(colData$condition)
+
+ggplot(y) +
+  aes(PC1, PC2, col=Condition) +
+  geom_point() +
+  geom_text_repel(label=rownames(y)) +
+  theme_bw()
+```
+
